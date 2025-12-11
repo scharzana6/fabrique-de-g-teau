@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gâteaux à faire – Synchronisé</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #f5f5f5;
+    }
+    #screen {
+      width: 300px;
+      min-height: 200px;
+      background: #fff;
+      border: 2px solid #000;
+      padding: 20px;
+      margin-bottom: 20px;
+      font-size: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    #cakes span {
+      font-size: 2rem;
+      margin: 2px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    #add {
+      background: #4caf50;
+      color: white;
+    }
+    #remove {
+      background: #f44336;
+      color: white;
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+  <div id="screen">
+    <div id="label">Gâteaux à faire :</div>
+    <div id="count">0</div>
+    <div id="cakes"></div>
+  </div>
+
+  <button id="add">Order Cake</button>
+  <button id="remove">Done</button>
+
+  <script>
+    // --- CONFIGURATION FIREBASE ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyBRY2uVNm9IMFzE6bGwH7cyBaP37_mjeh0",
+      authDomain: "fabriquedegateaux.firebaseapp.com",
+      databaseURL: "https://fabriquedegateaux-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "fabriquedegateaux",
+      storageBucket: "fabriquedegateaux.firebasestorage.app",
+      messagingSenderId: "709705066870",
+      appId: "1:709705066870:web:6deb6d6215ce60f83cf257"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const countRef = db.ref('nbTaches');
+
+    const addBtn = document.getElementById('add');
+    const removeBtn = document.getElementById('remove');
+    const countDisplay = document.getElementById('count');
+
+    // --- Détection du mode depuis l'URL ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+
+    if (mode === 'outside') removeBtn.style.display = 'none';
+    else if (mode === 'inside') addBtn.style.display = 'none';
+
+    // --- Fonction pour afficher les gâteaux (emoji) ---
+    function updateCakes(count) {
+      const cakesDiv = document.getElementById('cakes');
+      cakesDiv.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const span = document.createElement('span');
+        span.textContent = '🎂';
+        cakesDiv.appendChild(span);
+      }
+    }
+
+    // --- Mettre à jour le compteur et les gâteaux ---
+    countRef.on('value', (snapshot) => {
+      const val = snapshot.val() || 0;
+      countDisplay.textContent = val;
+      updateCakes(val);
+    });
+
+    // --- Ajouter tâche ---
+    addBtn.addEventListener('click', () => {
+      countRef.transaction(current => (current || 0) + 1);
+    });
+
+    // --- Enlever tâche ---
+    removeBtn.addEventListener('click', () => {
+      countRef.transaction(current => Math.max((current || 0) - 1, 0));
+    });
+  </script>
+</body>
+</html>
