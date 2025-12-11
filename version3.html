@@ -101,6 +101,8 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+db.ref("accessCode").set("gateau2025");
+    const db = firebase.database();
     const countRef = db.ref('nbTaches');
 
     const addBtn = document.getElementById('add');
